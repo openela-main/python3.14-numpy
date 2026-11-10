@@ -1,0 +1,40 @@
+From 8845f7ac440a6469e84030847c2271930a1d538b Mon Sep 17 00:00:00 2001
+From: Charalampos Stratakis <cstratak@redhat.com>
+Date: Sat, 25 Apr 2026 05:03:20 +0200
+Subject: [PATCH] TST: fix test_validate_transcendentals skip condition to
+ match SVML dispatch
+
+The test was running on machines with FMA3+AVX2 or AVX512F, but the
+SVML code path requires AVX512_SKX (F+BW+DQ+VL). On machines without
+AVX512_SKX, the glibc libm scalar fallback is used, which exceeds the
+2 ULP tolerance for some float64 cbrt inputs.
+---
+ numpy/_core/tests/test_umath_accuracy.py | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/numpy/_core/tests/test_umath_accuracy.py b/numpy/_core/tests/test_umath_accuracy.py
+index 5707e92..2c44e97 100644
+--- a/numpy/_core/tests/test_umath_accuracy.py
++++ b/numpy/_core/tests/test_umath_accuracy.py
+@@ -18,14 +18,14 @@
+ UNARY_OBJECT_UFUNCS.remove(np.invert)
+ UNARY_OBJECT_UFUNCS.remove(np.bitwise_count)
+ 
+-IS_AVX = __cpu_features__.get('AVX512F', False) or \
+-        (__cpu_features__.get('FMA3', False) and __cpu_features__.get('AVX2', False))
++# SVML is only dispatched on AVX512_SKX (see loops_umath_fp.dispatch.c.src)
++IS_SVML = __cpu_features__.get('AVX512_SKX', False)
+ 
+ IS_AVX512FP16 = __cpu_features__.get('AVX512FP16', False)
+ 
+-# only run on linux with AVX, also avoid old glibc (numpy/numpy#20448).
++# only run on linux with SVML, also avoid old glibc (numpy/numpy#20448).
+ runtest = (sys.platform.startswith('linux')
+-           and IS_AVX and not _glibc_older_than("2.17"))
++           and IS_SVML and not _glibc_older_than("2.17"))
+ platform_skip = pytest.mark.skipif(not runtest,
+                                    reason="avoid testing inconsistent platform "
+                                    "library implementations")
+-- 
+2.54.0
+

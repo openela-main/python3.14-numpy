@@ -1,0 +1,249 @@
+From 78bcbebe048bbc16c771ca96a328c01d6f299c06 Mon Sep 17 00:00:00 2001
+From: stratakis <cstratak@redhat.com>
+Date: Fri, 19 Dec 2025 18:43:45 +0100
+Subject: [PATCH 1/4] MAINT: fix array size declarations in
+ string_partition_resolve_descriptors (#30475)
+
+---
+ numpy/_core/src/umath/string_ufuncs.cpp      | 6 +++---
+ numpy/_core/src/umath/stringdtype_ufuncs.cpp | 6 +++---
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/numpy/_core/src/umath/string_ufuncs.cpp b/numpy/_core/src/umath/string_ufuncs.cpp
+index 9b3d86c..4a65227 100644
+--- a/numpy/_core/src/umath/string_ufuncs.cpp
++++ b/numpy/_core/src/umath/string_ufuncs.cpp
+@@ -1125,9 +1125,9 @@ string_partition_promoter(PyObject *NPY_UNUSED(ufunc),
+ static NPY_CASTING
+ string_partition_resolve_descriptors(
+         PyArrayMethodObject *self,
+-        PyArray_DTypeMeta *const NPY_UNUSED(dtypes[3]),
+-        PyArray_Descr *const given_descrs[3],
+-        PyArray_Descr *loop_descrs[3],
++        PyArray_DTypeMeta *const NPY_UNUSED(dtypes[6]),
++        PyArray_Descr *const given_descrs[6],
++        PyArray_Descr *loop_descrs[6],
+         npy_intp *NPY_UNUSED(view_offset))
+ {
+     if (!given_descrs[3] || !given_descrs[4] || !given_descrs[5]) {
+diff --git a/numpy/_core/src/umath/stringdtype_ufuncs.cpp b/numpy/_core/src/umath/stringdtype_ufuncs.cpp
+index ca574f6..7f29a3e 100644
+--- a/numpy/_core/src/umath/stringdtype_ufuncs.cpp
++++ b/numpy/_core/src/umath/stringdtype_ufuncs.cpp
+@@ -1928,9 +1928,9 @@ zfill_strided_loop(PyArrayMethod_Context *context,
+ static NPY_CASTING
+ string_partition_resolve_descriptors(
+         PyArrayMethodObject *self,
+-        PyArray_DTypeMeta *const NPY_UNUSED(dtypes[3]),
+-        PyArray_Descr *const given_descrs[3],
+-        PyArray_Descr *loop_descrs[3],
++        PyArray_DTypeMeta *const NPY_UNUSED(dtypes[5]),
++        PyArray_Descr *const given_descrs[5],
++        PyArray_Descr *loop_descrs[5],
+         npy_intp *NPY_UNUSED(view_offset))
+ {
+     if (given_descrs[2] || given_descrs[3] || given_descrs[4]) {
+-- 
+2.55.0
+
+
+From b8efba3ffd3f9687d90d815643ac22f750f3af31 Mon Sep 17 00:00:00 2001
+From: stratakis <cstratak@redhat.com>
+Date: Thu, 26 Feb 2026 15:17:50 +0100
+Subject: [PATCH 2/4] BUG: Fix buffer overrun in CPU baseline validation
+ (#30877)
+
+Co-authored-by: Sebastian Berg <sebastianb@nvidia.com>
+---
+ numpy/_core/src/common/npy_cpu_features.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/numpy/_core/src/common/npy_cpu_features.c b/numpy/_core/src/common/npy_cpu_features.c
+index e9239a2..3c6d517 100644
+--- a/numpy/_core/src/common/npy_cpu_features.c
++++ b/numpy/_core/src/common/npy_cpu_features.c
+@@ -222,14 +222,13 @@ npy__cpu_validate_baseline(void)
+ 
+     #define NPY__CPU_VALIDATE_CB(FEATURE, DUMMY)                  \
+         if (!npy__cpu_have[NPY_CAT(NPY_CPU_FEATURE_, FEATURE)]) { \
+-            const int size = sizeof(NPY_TOSTRING(FEATURE));       \
++            const int size = sizeof(NPY_TOSTRING(FEATURE)) - 1;       \
+             memcpy(fptr, NPY_TOSTRING(FEATURE), size);            \
+             fptr[size] = ' '; fptr += size + 1;                   \
+         }
+     NPY_WITH_CPU_BASELINE_CALL(NPY__CPU_VALIDATE_CB, DUMMY) // extra arg for msvc
+-    *fptr = '\0';
+ 
+-    if (baseline_failure[0] != '\0') {
++    if (fptr > baseline_failure) {
+         *(fptr-1) = '\0'; // trim the last space
+         PyErr_Format(PyExc_RuntimeError,
+             "NumPy was built with baseline optimizations: \n"
+-- 
+2.55.0
+
+
+From a42fc7e094b9f2f01c14973f80e4236549297bcd Mon Sep 17 00:00:00 2001
+From: Charalampos Stratakis <cstratak@redhat.com>
+Date: Wed, 1 Jul 2026 04:45:53 +0200
+Subject: [PATCH 3/4] BUG: Fix MaskedRecords.view() dtype reset and _fill_value
+ handling
+
+Reset dtype after an ndarray subclass is interpreted as the view type in
+MaskedRecords.view(), matching MaskedArray.view(). Reset _fill_value
+for real dtype views and add test coverage.
+
+Closes #30441
+
+Co-authored-by: Saba Siddique <sabasiddiqdev@gmail.com>
+---
+ numpy/ma/mrecords.py            |  5 +++++
+ numpy/ma/tests/test_mrecords.py | 18 ++++++++++++++++++
+ 2 files changed, 23 insertions(+)
+
+diff --git a/numpy/ma/mrecords.py b/numpy/ma/mrecords.py
+index 835f3ce..29e3e39 100644
+--- a/numpy/ma/mrecords.py
++++ b/numpy/ma/mrecords.py
+@@ -364,6 +364,7 @@ def view(self, dtype=None, type=None):
+             try:
+                 if issubclass(dtype, np.ndarray):
+                     output = np.ndarray.view(self, dtype)
++                    dtype = None
+                 else:
+                     output = np.ndarray.view(self, dtype)
+             # OK, there's the change
+@@ -386,6 +387,10 @@ def view(self, dtype=None, type=None):
+             mdtype = ma.make_mask_descr(output.dtype)
+             output._mask = self._mask.view(mdtype, np.ndarray)
+             output._mask.shape = output.shape
++        # Make sure to reset the _fill_value if needed
++        if getattr(output, '_fill_value', None) is not None:
++            if dtype is not None:
++                output._fill_value = None
+         return output
+ 
+     def harden_mask(self):
+diff --git a/numpy/ma/tests/test_mrecords.py b/numpy/ma/tests/test_mrecords.py
+index 0da9151..5d9d09b 100644
+--- a/numpy/ma/tests/test_mrecords.py
++++ b/numpy/ma/tests/test_mrecords.py
+@@ -386,6 +386,24 @@ def test_view_flexible_type(self):
+         assert_equal(test.dtype, np.dtype(alttype))
+         assert_(test._fill_value is None)
+ 
++    def test_view_ndarray_subclass_preserves_dtype(self):
++        mrec = self.data[0]
++
++        class MySub(np.ndarray):
++            pass
++
++        test = mrec.view(MySub)
++        assert_(isinstance(test, MySub))
++        assert_equal(test.dtype, mrec.dtype)
++
++    def test_view_maskedarray_preserves_fill_value(self):
++        mrec = self.data[0]
++        original_fv = mrec.fill_value
++
++        test = mrec.view(ma.MaskedArray)
++        assert_(isinstance(test, ma.MaskedArray))
++        assert_equal(test.fill_value, original_fv)
++
+ 
+ ##############################################################################
+ class TestMRecordsImport:
+-- 
+2.55.0
+
+
+From d85dde322beb59450f728b505534206c230fe993 Mon Sep 17 00:00:00 2001
+From: Iason Krommydas <iason.krom@gmail.com>
+Date: Wed, 14 Jan 2026 13:41:18 +0100
+Subject: [PATCH 4/4] BUG: unrelated error raised when a dtype's `__setstate__`
+ is called with an invalid state tuple size (#30647)
+
+Raise a simple error rather than trying to correctly raise a more precise on in
+__setstate__ for some bad inputs.
+---
+ numpy/_core/src/multiarray/descriptor.c | 15 ++++++---------
+ numpy/_core/tests/test_dtype.py         | 23 +++++++++++++++++++++++
+ 2 files changed, 29 insertions(+), 9 deletions(-)
+
+diff --git a/numpy/_core/src/multiarray/descriptor.c b/numpy/_core/src/multiarray/descriptor.c
+index abe737a..de08037 100644
+--- a/numpy/_core/src/multiarray/descriptor.c
++++ b/numpy/_core/src/multiarray/descriptor.c
+@@ -852,7 +852,7 @@ _try_convert_from_inherit_tuple(PyArray_Descr *type, PyObject *newobj)
+         return (PyArray_Descr *)Py_NotImplemented;
+     }
+     if (!PyDataType_ISLEGACY(type) || !PyDataType_ISLEGACY(conv)) {
+-        /* 
++        /*
+          * This specification should probably be never supported, but
+          * certainly not for new-style DTypes.
+          */
+@@ -1978,7 +1978,7 @@ NPY_NO_EXPORT PyArray_Descr *
+ PyArray_DescrNew(PyArray_Descr *base_descr)
+ {
+     if (!PyDataType_ISLEGACY(base_descr)) {
+-        /* 
++        /*
+          * The main use of this function is mutating strings, so probably
+          * disallowing this is fine in practice.
+          */
+@@ -2923,13 +2923,10 @@ arraydescr_setstate(_PyArray_LegacyDescr *self, PyObject *args)
+         }
+         break;
+     default:
+-        /* raise an error */
+-        if (PyTuple_GET_SIZE(PyTuple_GET_ITEM(args,0)) > 5) {
+-            version = PyLong_AsLong(PyTuple_GET_ITEM(args, 0));
+-        }
+-        else {
+-            version = -1;
+-        }
++        PyErr_SetString(PyExc_ValueError,
++                        "Invalid state while unpickling. Is the pickle corrupted "
++                        "or created with a newer NumPy version?");
++        return NULL;
+     }
+ 
+     /*
+diff --git a/numpy/_core/tests/test_dtype.py b/numpy/_core/tests/test_dtype.py
+index 684672a..086d93c 100644
+--- a/numpy/_core/tests/test_dtype.py
++++ b/numpy/_core/tests/test_dtype.py
+@@ -1440,6 +1440,29 @@ def test_pickle_dtype(self, dt):
+             assert roundtrip_dt == dt
+             assert hash(dt) == pre_pickle_hash
+ 
++    @pytest.mark.parametrize('dt', [
++        np.dtype([('a', 'i4'), ('b', 'f8')]),
++        np.dtype('i4, i1', align=True),
++    ])
++    def test_setstate_invalid_tuple_size(self, dt):
++        # gh-30476
++        valid_state = dt.__reduce__()[2]
++        dt.__setstate__(valid_state)
++
++        for size in [1, 2, 3, 4]:
++            with pytest.raises(
++                ValueError, match="Invalid state while unpickling"
++            ):
++                dt.__setstate__(valid_state[:size])
++
++        min_extra = 10 - len(valid_state)
++        for extra in range(min_extra, min_extra + 5):
++            extended = valid_state + (None,) * extra
++            with pytest.raises(
++                ValueError, match="Invalid state while unpickling"
++            ):
++                dt.__setstate__(extended)
++
+ 
+ class TestPromotion:
+     """Test cases related to more complex DType promotions.  Further promotion
+-- 
+2.55.0
+

@@ -22,7 +22,7 @@
 
 Name:           python%{python3_pkgversion}-numpy
 Version:        2.3.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A fast multidimensional array facility for Python
 
 # Everything is BSD-3-Clause except...
@@ -34,6 +34,28 @@ Summary:        A fast multidimensional array facility for Python
 License:        BSD-3-Clause AND MIT AND Apache-2.0 AND (Zlib OR BSL-1.0)
 URL:            http://www.numpy.org/
 Source0:        https://github.com/%{modname}/%{modname}/releases/download/v%{version}/%{modname}-%{version}.tar.gz
+
+# Resolve issues identified by coverity static analysis
+# Resolved upstream:
+# https://github.com/numpy/numpy/pull/30877
+# https://github.com/numpy/numpy/pull/30647
+# https://github.com/numpy/numpy/pull/30475
+# Sent upstream:
+# https://github.com/numpy/numpy/pull/31819
+Patch:          coverity-fixes.patch
+
+# Fix test_validate_transcendentals skip to match SVML dispatch
+# Sent upstream: https://github.com/numpy/numpy/pull/31333
+Patch:          fix-test_validate_transcendentals-x86_64.patch
+
+# Fix signed overflow issue in npy_gcd for INT_MIN on s390x
+# Resolved upstream:
+# https://github.com/numpy/numpy/pull/31360
+Patch:          fix-signed-overflow-s390x.patch
+
+# Enable CET hardware protections for the AVX-512 assembly
+# Sent upstream: https://github.com/numpy/SVML/pull/8
+Patch:          cet-protections.patch
 
 BuildRequires:  python%{python3_pkgversion}-devel
 BuildRequires:  gcc-gfortran gcc gcc-c++
@@ -206,6 +228,13 @@ export PYTHONPATH=%{buildroot}%{python3_sitearch}
 
 
 %changelog
+* Tue Jul 07 2026 Charalampos Stratakis <cstratak@redhat.com> - 2.3.4-2
+- Fix issues identified via Coverity static analysis
+- Fix test_validate_transcendentals skip to match SVML dispatch
+- Fix signed overflow issue in npy_gcd for INT_MIN on s390x
+- Enable CET hardware protections
+- Fixes: RHEL-137130, RHEL-161528, RHEL-160066, RHEL-238378
+
 * Thu Oct 23 2025 Tomáš Hrnčiar <thrnciar@redhat.com> - 2.3.4-1
 - Initial import
 - Fedora contributions by:

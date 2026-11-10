@@ -1,0 +1,3787 @@
+From 044df20f58d35e43a77bdc490d3cffc872a4ff4c Mon Sep 17 00:00:00 2001
+From: Charalampos Stratakis <cstratak@redhat.com>
+Date: Wed, 12 Aug 2026 19:11:15 +0200
+Subject: [PATCH] Add CET support to AVX-512 assembly
+
+Add ENDBR64 instructions to function entry points and mark each
+assembly object as supporting IBT and shadow stack.
+---
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_d_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_d_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_h_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_s_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_s_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_d_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_d_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_h_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_s_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_s_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_d_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_d_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_h_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_s_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_s_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_d_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_d_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_h_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_s_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_s_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_d_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_d_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_h_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_s_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_s_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_d_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_d_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_h_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_s_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_s_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_d_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_d_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_h_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_s_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_s_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_d_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_d_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_h_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_s_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_s_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_d_ha.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_d_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_h_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_s_ha.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_s_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_d_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_d_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_h_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_s_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_s_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp10_h_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_d_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_d_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_h_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_s_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_s_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_d_ha.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_d_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_h_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_s_ha.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_s_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_d_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_d_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_h_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_s_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_s_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_d_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_d_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_h_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_s_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_s_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_d_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_d_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_h_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_s_ha.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_s_la.s | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_d_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_d_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_h_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_s_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_s_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_d_ha.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_d_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_h_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_s_ha.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_s_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_d_ha.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_d_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_h_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_s_ha.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_s_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_d_ha.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_d_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_h_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_s_ha.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_s_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_d_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_d_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_h_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_s_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_s_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_d_ha.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_d_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_h_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_s_ha.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_s_la.s   | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_d_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_d_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_h_la.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_s_ha.s  | 17 +++++++++++++++++
+ numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_s_la.s  | 17 +++++++++++++++++
+ 111 files changed, 1887 insertions(+)
+
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_d_ha.s
+index 72c2c3c..aafb295 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_d_ha.s
+@@ -25,6 +25,7 @@ __svml_acos8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2667,4 +2668,20 @@ _vmldACosHATab:
+ 	.long	0x00000000,0x80000000,0x00000000,0x00000000
+ 	.type	.L_2il0floatpacket.201,@object
+ 	.size	.L_2il0floatpacket.201,16
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_d_la.s
+index 1e8b1d2..19873a7 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_d_la.s
+@@ -15,6 +15,7 @@ __svml_acos8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2642,4 +2643,20 @@ _vmldACosHATab:
+ 	.type	.L_2il0floatpacket.197,@object
+ 	.size	.L_2il0floatpacket.197,16
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_h_la.s
+index d8f91f8..14aa2dd 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_h_la.s
+@@ -22,6 +22,7 @@
+ __svml_acoss32:
+ 
+         .cfi_startproc
++	endbr64
+ 
+         vmovdqu16 __svml_hacos_data_internal(%rip), %zmm30
+         vmovdqu16 64+__svml_hacos_data_internal(%rip), %zmm1
+@@ -144,4 +145,20 @@ __svml_hacos_data_internal:
+ 	.endr
+         .type	__svml_hacos_data_internal,@object
+         .size	__svml_hacos_data_internal,512
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_s_ha.s
+index 2279b89..b4557de 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_s_ha.s
+@@ -25,6 +25,7 @@ __svml_acosf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2322,4 +2323,20 @@ _vmldACosHATab:
+ 	.long	0x00000000,0x80000000,0x00000000,0x00000000
+ 	.type	.L_2il0floatpacket.204,@object
+ 	.size	.L_2il0floatpacket.204,16
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_s_la.s
+index 74d1558..5d02cc4 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acos_s_la.s
+@@ -15,6 +15,7 @@ __svml_acosf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2292,4 +2293,20 @@ _vmldACosHATab:
+ 	.type	.L_2il0floatpacket.199,@object
+ 	.size	.L_2il0floatpacket.199,16
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_d_ha.s
+index a09b0d3..c90be2c 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_d_ha.s
+@@ -35,6 +35,7 @@ __svml_acosh8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -971,4 +972,20 @@ __dacosh_ha_CoutTab:
+ 	.long	4293918720
+ 	.type	__dacosh_ha_CoutTab,@object
+ 	.size	__dacosh_ha_CoutTab,32
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_d_la.s
+index 250b0fc..1afef95 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_d_la.s
+@@ -25,6 +25,7 @@ __svml_acosh8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -891,4 +892,20 @@ __dacosh_la_CoutTab:
+ 	.type	__dacosh_la_CoutTab,@object
+ 	.size	__dacosh_la_CoutTab,32
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_h_la.s
+index 78db167..4d254a9 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_h_la.s
+@@ -27,6 +27,7 @@
+ __svml_acoshs32:
+ 
+         .cfi_startproc
++	endbr64
+         vmovdqu16 __svml_hacosh_data_internal(%rip), %zmm13
+         vmovdqu16 64+__svml_hacosh_data_internal(%rip), %zmm1
+         vmovdqu16 128+__svml_hacosh_data_internal(%rip), %zmm31
+@@ -186,4 +187,20 @@ __svml_hacosh_data_internal:
+ 	.endr
+         .type	__svml_hacosh_data_internal,@object
+         .size	__svml_hacosh_data_internal,832
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_s_ha.s
+index 785e949..c9e0916 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_s_ha.s
+@@ -35,6 +35,7 @@ __svml_acoshf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -731,4 +732,20 @@ __sacosh_ha__iml_sacosh_cout_tab:
+ 	.long	2139095040
+ 	.type	__sacosh_ha__iml_sacosh_cout_tab,@object
+ 	.size	__sacosh_ha__iml_sacosh_cout_tab,12
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_s_la.s
+index eddf0f3..fbc9ce2 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_acosh_s_la.s
+@@ -25,6 +25,7 @@ __svml_acoshf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -685,4 +686,20 @@ __sacosh_la__iml_sacosh_cout_tab:
+ 	.type	__sacosh_la__iml_sacosh_cout_tab,@object
+ 	.size	__sacosh_la__iml_sacosh_cout_tab,12
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_d_ha.s
+index 2835079..b783815 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_d_ha.s
+@@ -25,6 +25,7 @@ __svml_asin8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2581,4 +2582,20 @@ _vmldASinHATab:
+ 	.long	3217739776
+ 	.type	_vmldASinHATab,@object
+ 	.size	_vmldASinHATab,4504
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_d_la.s
+index c1605c3..00d2f8a 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_d_la.s
+@@ -15,6 +15,7 @@ __svml_asin8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2551,4 +2552,20 @@ _vmldASinHATab:
+ 	.type	_vmldASinHATab,@object
+ 	.size	_vmldASinHATab,4504
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_h_la.s
+index d4e73ac..aac4301 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_h_la.s
+@@ -22,6 +22,7 @@
+ __svml_asins32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_hasin_data_internal(%rip), %zmm30
+         vmovdqu16 64+__svml_hasin_data_internal(%rip), %zmm1
+@@ -134,4 +135,20 @@ __svml_hasin_data_internal:
+ 	.endr
+         .type	__svml_hasin_data_internal,@object
+         .size	__svml_hasin_data_internal,512
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_s_ha.s
+index 231791a..e754684 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_s_ha.s
+@@ -25,6 +25,7 @@ __svml_asinf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2234,4 +2235,20 @@ _vmldASinHATab:
+ 	.long	3217739776
+ 	.type	_vmldASinHATab,@object
+ 	.size	_vmldASinHATab,4504
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_s_la.s
+index 27f01ee..7c90dd9 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asin_s_la.s
+@@ -15,6 +15,7 @@ __svml_asinf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2199,4 +2200,20 @@ _vmldASinHATab:
+ 	.type	_vmldASinHATab,@object
+ 	.size	_vmldASinHATab,4504
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_d_ha.s
+index ab6b868..bc6a249 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_d_ha.s
+@@ -35,6 +35,7 @@ __svml_asinh8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -928,4 +929,20 @@ __svml_dasinh_ha_data_internal_avx512:
+ 	.long	1071644672
+ 	.type	__svml_dasinh_ha_data_internal_avx512,@object
+ 	.size	__svml_dasinh_ha_data_internal_avx512,2176
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_d_la.s
+index 1bd76cd..726aa2f 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_d_la.s
+@@ -25,6 +25,7 @@ __svml_asinh8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -874,4 +875,20 @@ __svml_dasinh_data_internal_avx512:
+ 	.type	__svml_dasinh_data_internal_avx512,@object
+ 	.size	__svml_dasinh_data_internal_avx512,2048
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_h_la.s
+index 030dde8..e780869 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_h_la.s
+@@ -21,6 +21,7 @@
+ __svml_asinhs32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_hasinh_data_internal(%rip), %zmm22
+         vmovdqu16 64+__svml_hasinh_data_internal(%rip), %zmm31
+@@ -182,4 +183,20 @@ __svml_hasinh_data_internal:
+ 	.endr
+         .type	__svml_hasinh_data_internal,@object
+         .size	__svml_hasinh_data_internal,960
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_s_ha.s
+index 5bff3dd..9df86fb 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_s_ha.s
+@@ -35,6 +35,7 @@ __svml_asinhf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -693,4 +694,20 @@ __svml_sasinh_ha_data_internal_avx512:
+ 	.long	939916788
+ 	.type	__svml_sasinh_ha_data_internal_avx512,@object
+ 	.size	__svml_sasinh_ha_data_internal_avx512,1344
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_s_la.s
+index 1ddf55c..e50f35d 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_asinh_s_la.s
+@@ -25,6 +25,7 @@ __svml_asinhf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -673,4 +674,20 @@ __svml_sasinh_data_internal_avx512:
+ 	.type	__svml_sasinh_data_internal_avx512,@object
+ 	.size	__svml_sasinh_data_internal_avx512,1344
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_d_ha.s
+index 7c047fa..38ccc9d 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_d_ha.s
+@@ -37,6 +37,7 @@ __svml_atan28_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2724,4 +2725,20 @@ __datan2_ha_CoutTab:
+ 	.long	0xffffffff,0xffffffff
+ 	.type	.L_2il0floatpacket.40,@object
+ 	.size	.L_2il0floatpacket.40,8
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_d_la.s
+index bbc35ac..063d7c5 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_d_la.s
+@@ -27,6 +27,7 @@ __svml_atan28:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2393,4 +2394,20 @@ __datan2_la_CoutTab:
+ 	.type	.L_2il0floatpacket.31,@object
+ 	.size	.L_2il0floatpacket.31,8
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_h_la.s
+index 4189805..b0142c9 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_h_la.s
+@@ -34,6 +34,7 @@
+ __svml_atan2s32:
+ 
+         .cfi_startproc
++	endbr64
+ 
+         pushq     %rbp
+         .cfi_def_cfa_offset 16
+@@ -251,4 +252,20 @@ __svml_hatan2_data_internal:
+ 	.endr
+         .type	__svml_hatan2_data_internal,@object
+         .size	__svml_hatan2_data_internal,576
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_s_ha.s
+index 70b98fe..87a12a5 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_s_ha.s
+@@ -37,6 +37,7 @@ __svml_atan2f16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2370,4 +2371,20 @@ __satan2_ha_CoutTab:
+ 	.long	1101004800
+ 	.type	__satan2_ha_CoutTab,@object
+ 	.size	__satan2_ha_CoutTab,2008
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_s_la.s
+index 4abefff..8b8d751 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan2_s_la.s
+@@ -27,6 +27,7 @@ __svml_atan2f16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2074,4 +2075,20 @@ __satan2_la_CoutTab:
+ 	.type	__satan2_la_CoutTab,@object
+ 	.size	__satan2_la_CoutTab,2008
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_d_ha.s
+index 7e8f7e1..15f404b 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_d_ha.s
+@@ -37,6 +37,7 @@ __svml_atan8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         vmovups   128+__svml_datan_ha_data_internal_avx512(%rip), %zmm8
+@@ -1384,4 +1385,20 @@ __datan_ha_CoutTab:
+ 	.long	1101004800
+ 	.type	__datan_ha_CoutTab,@object
+ 	.size	__datan_ha_CoutTab,1936
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_d_la.s
+index 40875b9..399f1c0 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_d_la.s
+@@ -27,6 +27,7 @@ __svml_atan8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         vmovups   64+__svml_datan_data_internal_avx512(%rip), %zmm4
+@@ -1352,4 +1353,20 @@ __datan_la_CoutTab:
+ 	.type	.L_2il0floatpacket.14,@object
+ 	.size	.L_2il0floatpacket.14,8
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_h_la.s
+index 6c6ca08..892df8e 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_h_la.s
+@@ -24,6 +24,7 @@
+ __svml_atans32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_hatan_data_internal(%rip), %zmm30
+         vmovdqu16 64+__svml_hatan_data_internal(%rip), %zmm5
+@@ -137,4 +138,20 @@ __svml_hatan_data_internal:
+ 	.endr
+         .type	__svml_hatan_data_internal,@object
+         .size	__svml_hatan_data_internal,576
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_s_ha.s
+index 864151a..1aaaf92 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_s_ha.s
+@@ -37,6 +37,7 @@ __svml_atanf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         vmovups   128+__svml_satan_ha_data_internal_avx512(%rip), %zmm4
+@@ -394,4 +395,20 @@ __svml_satan_ha_data_internal_avx512:
+ 	.long	3198855850
+ 	.type	__svml_satan_ha_data_internal_avx512,@object
+ 	.size	__svml_satan_ha_data_internal_avx512,1024
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_s_la.s
+index 96412cf..85239ba 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atan_s_la.s
+@@ -27,6 +27,7 @@ __svml_atanf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         vandps    __svml_satan_data_internal_avx512(%rip), %zmm0, %zmm7
+@@ -355,4 +356,20 @@ __svml_satan_data_internal_avx512:
+ 	.type	__svml_satan_data_internal_avx512,@object
+ 	.size	__svml_satan_data_internal_avx512,1024
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_d_ha.s
+index 0810a24..b75ddd6 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_d_ha.s
+@@ -34,6 +34,7 @@ __svml_atanh8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -694,4 +695,20 @@ __datanh_ha_CoutTab:
+ 	.long	4293918720
+ 	.type	__datanh_ha_CoutTab,@object
+ 	.size	__datanh_ha_CoutTab,32
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_d_la.s
+index 75a584b..46aacf6 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_d_la.s
+@@ -24,6 +24,7 @@ __svml_atanh8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -656,4 +657,20 @@ __datanh_la_CoutTab:
+ 	.type	__datanh_la_CoutTab,@object
+ 	.size	__datanh_la_CoutTab,32
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_h_la.s
+index 215aa13..e1eb8a4 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_h_la.s
+@@ -26,6 +26,7 @@
+ __svml_atanhs32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_hatanh_data_internal(%rip), %zmm31
+         vmovdqu16 64+__svml_hatanh_data_internal(%rip), %zmm30
+@@ -189,4 +190,20 @@ __svml_hatanh_data_internal:
+ 	.endr
+         .type	__svml_hatanh_data_internal,@object
+         .size	__svml_hatanh_data_internal,384
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_s_ha.s
+index 3955a50..9ccd89d 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_s_ha.s
+@@ -34,6 +34,7 @@ __svml_atanhf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -576,4 +577,20 @@ __satanh_ha__imlsAtanhTab:
+ 	.long	2139095040
+ 	.type	__satanh_ha__imlsAtanhTab,@object
+ 	.size	__satanh_ha__imlsAtanhTab,12
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_s_la.s
+index 6e6840d..6ab9236 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_atanh_s_la.s
+@@ -24,6 +24,7 @@ __svml_atanhf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -558,4 +559,20 @@ __satanh_la__imlsAtanhTab:
+ 	.type	__satanh_la__imlsAtanhTab,@object
+ 	.size	__satanh_la__imlsAtanhTab,12
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_d_ha.s
+index eb1b725..f17d488 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_d_ha.s
+@@ -38,6 +38,7 @@ __svml_cbrt8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+ 
+@@ -934,4 +935,20 @@ __dcbrt_ha__vmldCbrtTab:
+ 	.long	0x00000000,0x80000000,0x00000000,0x00000000
+ 	.type	.L_2il0floatpacket.81,@object
+ 	.size	.L_2il0floatpacket.81,16
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_d_la.s
+index 8200666..d689db0 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_d_la.s
+@@ -28,6 +28,7 @@ __svml_cbrt8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         vgetmantpd $0, {sae}, %zmm0, %zmm14
+@@ -911,4 +912,20 @@ __dcbrt_la__vmldCbrtTab:
+ 	.type	.L_2il0floatpacket.81,@object
+ 	.size	.L_2il0floatpacket.81,16
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_h_la.s
+index 64192dc..6efb2c4 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_h_la.s
+@@ -25,6 +25,7 @@
+ __svml_cbrts32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_hcbrt_data_internal(%rip), %zmm31
+         vmovdqu16 64+__svml_hcbrt_data_internal(%rip), %zmm29
+@@ -164,4 +165,20 @@ __svml_hcbrt_data_internal:
+ 	.endr
+         .type	__svml_hcbrt_data_internal,@object
+         .size	__svml_hcbrt_data_internal,512
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_s_ha.s
+index fc22b44..a2d8c1d 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_s_ha.s
+@@ -38,6 +38,7 @@ __svml_cbrtf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+ 
+@@ -1035,4 +1036,20 @@ __scbrt_ha_vscbrt_ha_cout_data:
+ 	.long	0xbd288f47
+ 	.type	.L_2il0floatpacket.35,@object
+ 	.size	.L_2il0floatpacket.35,4
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_s_la.s
+index 7c7c5a2..cc5cd54 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cbrt_s_la.s
+@@ -28,6 +28,7 @@ __svml_cbrtf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         vgetmantps $0, {sae}, %zmm0, %zmm8
+@@ -1012,4 +1013,20 @@ __scbrt_la_vscbrt_ha_cout_data:
+ 	.type	.L_2il0floatpacket.35,@object
+ 	.size	.L_2il0floatpacket.35,4
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_d_ha.s
+index a9f1f54..1843ef1 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_d_ha.s
+@@ -50,6 +50,7 @@ __svml_cos8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -17661,4 +17662,20 @@ __dcos_ha_CoutTab:
+ 	.long	2146435072
+ 	.type	__dcos_ha_CoutTab,@object
+ 	.size	__dcos_ha_CoutTab,16
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_d_la.s
+index e87843d..c312829 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_d_la.s
+@@ -29,6 +29,7 @@ __svml_cos8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -17674,4 +17675,20 @@ __dcos_la_CoutTab:
+ 	.type	__dcos_la_CoutTab,@object
+ 	.size	__dcos_la_CoutTab,16
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_h_la.s
+index a0e9be4..ef9f111 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_h_la.s
+@@ -36,6 +36,7 @@
+ __svml_coss32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_hcos_data_internal(%rip), %zmm30
+         vmovdqu16 64+__svml_hcos_data_internal(%rip), %zmm29
+@@ -281,4 +282,20 @@ __svml_hcos_data_internal:
+ 	.endr
+         .type	__svml_hcos_data_internal,@object
+         .size	__svml_hcos_data_internal,1344
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_s_ha.s
+index 82f8319..c6db4b9 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_s_ha.s
+@@ -49,6 +49,7 @@ __svml_cosf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2857,4 +2858,20 @@ __scos_ha__vmlsCosCoutTab:
+ 	.long	2139095040
+ 	.type	__scos_ha__vmlsCosCoutTab,@object
+ 	.size	__scos_ha__vmlsCosCoutTab,8
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_s_la.s
+index 1a0542c..e608df8 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cos_s_la.s
+@@ -39,6 +39,7 @@ __svml_cosf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2854,4 +2855,20 @@ __scos_la__vmlsCosCoutTab:
+ 	.type	__scos_la__vmlsCosCoutTab,@object
+ 	.size	__scos_la__vmlsCosCoutTab,8
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_d_ha.s
+index 4c9f0f2..1caaf34 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_d_ha.s
+@@ -25,6 +25,7 @@ __svml_cosh8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1950,4 +1951,20 @@ __dcosh_ha_CoutTab:
+ 	.long	1077247184
+ 	.type	__dcosh_ha_CoutTab,@object
+ 	.size	__dcosh_ha_CoutTab,1152
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_d_la.s
+index b91b93a..1b36ecd 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_d_la.s
+@@ -15,6 +15,7 @@ __svml_cosh8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1715,4 +1716,20 @@ __dcosh_la_CoutTab:
+ 	.type	__dcosh_la_CoutTab,@object
+ 	.size	__dcosh_la_CoutTab,1152
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_h_la.s
+index e01323c..f5f89f7 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_h_la.s
+@@ -28,6 +28,7 @@
+ __svml_coshs32:
+ 
+         .cfi_startproc
++	endbr64
+         vmovdqu16 __svml_hcosh_data_internal(%rip), %zmm31
+         vmovdqu16 64+__svml_hcosh_data_internal(%rip), %zmm30
+         vmovdqu16 128+__svml_hcosh_data_internal(%rip), %zmm2
+@@ -134,4 +135,20 @@ __svml_hcosh_data_internal:
+ 	.endr
+         .type	__svml_hcosh_data_internal,@object
+         .size	__svml_hcosh_data_internal,640
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_s_ha.s
+index 1a34dc8..0634c41 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_s_ha.s
+@@ -25,6 +25,7 @@ __svml_coshf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2137,4 +2138,20 @@ __scosh_ha_CoutTab:
+ 	.long	1077247184
+ 	.type	__scosh_ha_CoutTab,@object
+ 	.size	__scosh_ha_CoutTab,1152
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_s_la.s
+index 0f89c9e..fce7d41 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_cosh_s_la.s
+@@ -15,6 +15,7 @@ __svml_coshf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1211,4 +1212,20 @@ __scosh_la_CoutTab:
+ 	.type	__scosh_la_CoutTab,@object
+ 	.size	__scosh_la_CoutTab,1152
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp10_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp10_h_la.s
+index 4bd0f27..f3c9167 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp10_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp10_h_la.s
+@@ -34,6 +34,7 @@
+ __svml_exp10s32:
+ 
+         .cfi_startproc
++	endbr64
+ 
+ /* restrict input range to [-8.0,6.0] */
+         vmovdqu16 64+__svml_hexp10_data_internal(%rip), %zmm1
+@@ -121,4 +122,20 @@ __svml_hexp10_data_internal:
+ 	.endr
+         .type	__svml_hexp10_data_internal,@object
+         .size	__svml_hexp10_data_internal,640
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_d_ha.s
+index 0c35863..5aa5b70 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_d_ha.s
+@@ -25,6 +25,7 @@ __svml_exp28_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -883,4 +884,20 @@ __dexp2_ha__imldExp2HATab:
+ 	.long	0
+ 	.type	__dexp2_ha__imldExp2HATab,@object
+ 	.size	__dexp2_ha__imldExp2HATab,1152
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_d_la.s
+index 8f5c4f6..7cd48e0 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_d_la.s
+@@ -15,6 +15,7 @@ __svml_exp28:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -830,4 +831,20 @@ __dexp2_la__imldExp2HATab:
+ 	.type	__dexp2_la__imldExp2HATab,@object
+ 	.size	__dexp2_la__imldExp2HATab,1152
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_h_la.s
+index 3bbdc93..26b3bc6 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_h_la.s
+@@ -43,6 +43,7 @@
+ __svml_exp2s32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_hexp2_data_internal(%rip), %zmm31
+         vmovdqu16 64+__svml_hexp2_data_internal(%rip), %zmm1
+@@ -139,4 +140,20 @@ __svml_hexp2_data_internal:
+ 	.endr
+         .type	__svml_hexp2_data_internal,@object
+         .size	__svml_hexp2_data_internal,768
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_s_ha.s
+index c5ebe4d..618e749 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_s_ha.s
+@@ -25,6 +25,7 @@ __svml_exp2f16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -755,4 +756,20 @@ __sexp2_ha__imldExp2HATab:
+ 	.long	0
+ 	.type	__sexp2_ha__imldExp2HATab,@object
+ 	.size	__sexp2_ha__imldExp2HATab,1152
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_s_la.s
+index e169145..351e950 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp2_s_la.s
+@@ -15,6 +15,7 @@ __svml_exp2f16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -494,4 +495,20 @@ __svml_sexp2_data_internal_avx512:
+ 	.type	.L_2il0floatpacket.56,@object
+ 	.size	.L_2il0floatpacket.56,4
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_d_ha.s
+index 55ed611..b131da1 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_d_ha.s
+@@ -47,6 +47,7 @@ __svml_exp8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1103,4 +1104,20 @@ _imldExpHATab:
+ 	.long	1106771968
+ 	.type	_imldExpHATab,@object
+ 	.size	_imldExpHATab,1176
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_d_la.s
+index 7de46b6..e11d310 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_d_la.s
+@@ -37,6 +37,7 @@ __svml_exp8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1074,4 +1075,20 @@ _imldExpHATab:
+ 	.type	_imldExpHATab,@object
+ 	.size	_imldExpHATab,1176
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_h_la.s
+index 274898f..e69be54 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_h_la.s
+@@ -25,6 +25,7 @@
+ __svml_exps32:
+ 
+         .cfi_startproc
++	endbr64
+ 
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_hexp_data_internal(%rip), %zmm31
+@@ -192,4 +193,20 @@ __svml_hexp_data_internal:
+ 	.endr
+         .type	__svml_hexp_data_internal,@object
+         .size	__svml_hexp_data_internal,1152
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_s_ha.s
+index fded195..e3f5d6a 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_s_ha.s
+@@ -48,6 +48,7 @@ __svml_expf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1010,4 +1011,20 @@ _vmldExpHATab:
+ 	.long	1106771968
+ 	.type	_vmldExpHATab,@object
+ 	.size	_vmldExpHATab,1176
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_s_la.s
+index 41e2172..32d29d9 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_exp_s_la.s
+@@ -38,6 +38,7 @@ __svml_expf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -772,4 +773,20 @@ __svml_sexp_data_internal_avx512:
+ 	.type	.L_2il0floatpacket.67,@object
+ 	.size	.L_2il0floatpacket.67,4
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_d_ha.s
+index f0514fe..68b2488 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_d_ha.s
+@@ -38,6 +38,7 @@ __svml_expm18_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1132,4 +1133,20 @@ _imldExpHATab:
+ 	.long	0x00000000,0xbff00000
+ 	.type	.L_2il0floatpacket.79,@object
+ 	.size	.L_2il0floatpacket.79,8
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_d_la.s
+index d65c2f0..9803753 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_d_la.s
+@@ -28,6 +28,7 @@ __svml_expm18:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1089,4 +1090,20 @@ _imldExpHATab:
+ 	.type	.L_2il0floatpacket.77,@object
+ 	.size	.L_2il0floatpacket.77,8
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_h_la.s
+index 9a707f1..c10ca16 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_h_la.s
+@@ -26,6 +26,7 @@
+ __svml_expm1s32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovups   __svml_hexpm1_data_internal(%rip), %zmm30
+         vmovups   64+__svml_hexpm1_data_internal(%rip), %zmm31
+@@ -152,4 +153,20 @@ __svml_hexpm1_data_internal:
+ 	.endr
+         .type	__svml_hexpm1_data_internal,@object
+         .size	__svml_hexpm1_data_internal,448
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_s_ha.s
+index b987b43..0bc0d95 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_s_ha.s
+@@ -38,6 +38,7 @@ __svml_expm1f16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1028,4 +1029,20 @@ _vmldExpHATab:
+ 	.long	0xbf800000
+ 	.type	.L_2il0floatpacket.76,@object
+ 	.size	.L_2il0floatpacket.76,4
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_s_la.s
+index 81fe691..04dd331 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_expm1_s_la.s
+@@ -28,6 +28,7 @@ __svml_expm1f16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -593,4 +594,20 @@ __svml_sexpm1_data_internal_avx512:
+ 	.type	.L_2il0floatpacket.56,@object
+ 	.size	.L_2il0floatpacket.56,4
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_d_ha.s
+index bcbed5f..c4d4231 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_d_ha.s
+@@ -37,6 +37,7 @@ __svml_log108_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1203,4 +1204,20 @@ __dlog10_ha_CoutTab:
+ 	.long	0x00000000,0x3ff00000
+ 	.type	.L_2il0floatpacket.91,@object
+ 	.size	.L_2il0floatpacket.91,8
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_d_la.s
+index a7cfc92..dda688a 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_d_la.s
+@@ -27,6 +27,7 @@ __svml_log108:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1124,4 +1125,20 @@ __dlog10_la_CoutTab:
+ 	.type	.L_2il0floatpacket.89,@object
+ 	.size	.L_2il0floatpacket.89,8
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_h_la.s
+index 3f51bee..f4815e1 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_h_la.s
+@@ -24,6 +24,7 @@
+ __svml_log10s32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 64+__svml_hlog10_data_internal(%rip), %zmm31
+         vmovdqu16 384+__svml_hlog10_data_internal(%rip), %zmm4
+@@ -149,4 +150,20 @@ __svml_hlog10_data_internal:
+ 	.endr
+         .type	__svml_hlog10_data_internal,@object
+         .size	__svml_hlog10_data_internal,1216
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_s_ha.s
+index 6e8c3a6..faf615b 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_s_ha.s
+@@ -39,6 +39,7 @@ __svml_log10f16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -950,4 +951,20 @@ __slog10_ha_CoutTab:
+ 	.long	0x3f800000
+ 	.type	.L_2il0floatpacket.99,@object
+ 	.size	.L_2il0floatpacket.99,4
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_s_la.s
+index 8c95cef..9046434 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log10_s_la.s
+@@ -29,6 +29,7 @@ __svml_log10f16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -754,4 +755,20 @@ __slog10_la_CoutTab:
+ 	.type	.L_2il0floatpacket.93,@object
+ 	.size	.L_2il0floatpacket.93,4
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_d_ha.s
+index 1187a72..cf9af5d 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_d_ha.s
+@@ -39,6 +39,7 @@ __svml_log1p8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1203,4 +1204,20 @@ __dlog1p_ha_CoutTab:
+ 	.long	0x00000000,0x3ff00000
+ 	.type	.L_2il0floatpacket.82,@object
+ 	.size	.L_2il0floatpacket.82,8
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_d_la.s
+index 2743531..677aa03 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_d_la.s
+@@ -29,6 +29,7 @@ __svml_log1p8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1132,4 +1133,20 @@ __dlog1p_la_CoutTab:
+ 	.type	.L_2il0floatpacket.81,@object
+ 	.size	.L_2il0floatpacket.81,8
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_h_la.s
+index 590987a..d9375c2 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_h_la.s
+@@ -24,6 +24,7 @@
+ __svml_log1ps32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_hlog1p_data_internal(%rip), %zmm6
+         vmovdqu16 64+__svml_hlog1p_data_internal(%rip), %zmm29
+@@ -161,4 +162,20 @@ __svml_hlog1p_data_internal:
+ 	.endr
+         .type	__svml_hlog1p_data_internal,@object
+         .size	__svml_hlog1p_data_internal,512
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_s_ha.s
+index 2be8614..5cc2a3e 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_s_ha.s
+@@ -39,6 +39,7 @@ __svml_log1pf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -957,4 +958,20 @@ __slog1p_ha_CoutTab:
+ 	.long	0x3f800000
+ 	.type	.L_2il0floatpacket.93,@object
+ 	.size	.L_2il0floatpacket.93,4
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_s_la.s
+index 19e1e19..3610757 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log1p_s_la.s
+@@ -15,6 +15,7 @@ __svml_log1pf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1650,4 +1651,20 @@ __slog1p_la_CoutTab:
+ 	.type	.L_2il0floatpacket.90,@object
+ 	.size	.L_2il0floatpacket.90,4
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_d_ha.s
+index 49117ef..02a828b 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_d_ha.s
+@@ -37,6 +37,7 @@ __svml_log28_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1791,4 +1792,20 @@ __dlog2_ha__P:
+ 	.long	1073157447
+ 	.type	__dlog2_ha__P,@object
+ 	.size	__dlog2_ha__P,56
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_d_la.s
+index 87bb0a9..d00c4f5 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_d_la.s
+@@ -27,6 +27,7 @@ __svml_log28:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1714,4 +1715,20 @@ __dlog2_la__P:
+ 	.type	__dlog2_la__P,@object
+ 	.size	__dlog2_la__P,56
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_h_la.s
+index 881e8e8..99fcdf6 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_h_la.s
+@@ -24,6 +24,7 @@
+ __svml_log2s32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_hlog2_data_internal(%rip), %zmm1
+         vmovdqu16 64+__svml_hlog2_data_internal(%rip), %zmm31
+@@ -151,4 +152,20 @@ __svml_hlog2_data_internal:
+ 	.endr
+         .type	__svml_hlog2_data_internal,@object
+         .size	__svml_hlog2_data_internal,1088
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_s_ha.s
+index 21392e6..60b14da 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_s_ha.s
+@@ -39,6 +39,7 @@ __svml_log2f16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -905,4 +906,20 @@ __slog2_ha_CoutTab:
+ 	.long	0x3f800000
+ 	.type	.L_2il0floatpacket.95,@object
+ 	.size	.L_2il0floatpacket.95,4
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_s_la.s
+index 66d90f0..639d474 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log2_s_la.s
+@@ -29,6 +29,7 @@ __svml_log2f16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -728,4 +729,20 @@ __slog2_la_CoutTab:
+ 	.type	.L_2il0floatpacket.90,@object
+ 	.size	.L_2il0floatpacket.90,4
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_d_ha.s
+index 8dff30a..0774b5c 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_d_ha.s
+@@ -38,6 +38,7 @@ __svml_log8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1163,4 +1164,20 @@ __dlog_ha_CoutTab:
+ 	.long	0x00000000,0x3ff00000
+ 	.type	.L_2il0floatpacket.81,@object
+ 	.size	.L_2il0floatpacket.81,8
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_d_la.s
+index 4ff3939..cab066f 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_d_la.s
+@@ -28,6 +28,7 @@ __svml_log8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1096,4 +1097,20 @@ __dlog_la_CoutTab:
+ 	.type	.L_2il0floatpacket.80,@object
+ 	.size	.L_2il0floatpacket.80,8
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_h_la.s
+index e10f87e..64f0df8 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_h_la.s
+@@ -24,6 +24,7 @@
+ __svml_logs32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_hlog_data_internal(%rip), %zmm31
+         vmovdqu16 64+__svml_hlog_data_internal(%rip), %zmm30
+@@ -209,4 +210,20 @@ __svml_hlog_data_internal:
+ 	.endr
+         .type	__svml_hlog_data_internal,@object
+         .size	__svml_hlog_data_internal,1024
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_s_ha.s
+index df13904..a878945 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_s_ha.s
+@@ -40,6 +40,7 @@ __svml_logf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1395,4 +1396,20 @@ _imlsLnHATab:
+ 	.long	0x00000000,0x3ff00000
+ 	.type	.L_2il0floatpacket.77,@object
+ 	.size	.L_2il0floatpacket.77,8
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_s_la.s
+index 20683db..cd625c6 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_log_s_la.s
+@@ -30,6 +30,7 @@ __svml_logf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -930,4 +931,20 @@ _imlsLnHATab:
+ 	.type	.L_2il0floatpacket.73,@object
+ 	.size	.L_2il0floatpacket.73,8
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_d_ha.s
+index 4834c07..e8b2f35 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_d_ha.s
+@@ -98,6 +98,7 @@ __svml_pow8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -3593,4 +3594,20 @@ __dpow_ha_CoutTab:
+ 	.long	862978048
+ 	.type	__dpow_ha_CoutTab,@object
+ 	.size	__dpow_ha_CoutTab,6880
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_d_la.s
+index b331ae3..1c97329 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_d_la.s
+@@ -88,6 +88,7 @@ __svml_pow8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -3525,4 +3526,20 @@ __dpow_la_CoutTab:
+ 	.type	__dpow_la_CoutTab,@object
+ 	.size	__dpow_la_CoutTab,6880
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_h_la.s
+index 9b5fd9b..d235598 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_h_la.s
+@@ -25,6 +25,7 @@
+ __svml_pows32:
+ 
+         .cfi_startproc
++	endbr64
+ 
+         pushq     %rbp
+         .cfi_def_cfa_offset 16
+@@ -279,4 +280,20 @@ __svml_hpow_data_internal:
+ 	.endr
+         .type	__svml_hpow_data_internal,@object
+         .size	__svml_hpow_data_internal,704
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_s_ha.s
+index 19b6851..92f630c 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_s_ha.s
+@@ -39,6 +39,7 @@ __svml_powf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2112,4 +2113,20 @@ __spow_ha_CoutTab:
+ 	.long	0x3f800000
+ 	.type	.L_2il0floatpacket.137,@object
+ 	.size	.L_2il0floatpacket.137,4
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_s_la.s
+index 2e47192..0b059ad 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_pow_s_la.s
+@@ -29,6 +29,7 @@ __svml_powf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2012,4 +2013,20 @@ __spow_la_CoutTab:
+ 	.type	.L_2il0floatpacket.136,@object
+ 	.size	.L_2il0floatpacket.136,4
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_d_ha.s
+index 687bf89..36ea954 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_d_ha.s
+@@ -48,6 +48,7 @@ __svml_sin8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -17698,4 +17699,20 @@ __dsin_ha_CoutTab:
+ 	.long	2146435072
+ 	.type	__dsin_ha_CoutTab,@object
+ 	.size	__dsin_ha_CoutTab,16
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_d_la.s
+index 3497c76..f22cd1f 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_d_la.s
+@@ -29,6 +29,7 @@ __svml_sin8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -17544,4 +17545,20 @@ __dsin_la_CoutTab:
+ 	.type	__dsin_la_CoutTab,@object
+ 	.size	__dsin_la_CoutTab,16
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_h_la.s
+index 356a751..923a83d 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_h_la.s
+@@ -25,6 +25,7 @@
+ __svml_sins32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_hsin_data_internal(%rip), %zmm25
+         vmovdqu16 64+__svml_hsin_data_internal(%rip), %zmm24
+@@ -250,4 +251,20 @@ __svml_hsin_data_internal:
+ 	.endr
+         .type	__svml_hsin_data_internal,@object
+         .size	__svml_hsin_data_internal,896
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_s_ha.s
+index 283371d..7d74f0c 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_s_ha.s
+@@ -50,6 +50,7 @@ __svml_sinf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2812,4 +2813,20 @@ __ssin_ha__vmlsSinHATab:
+ 	.long	2139095040
+ 	.type	__ssin_ha__vmlsSinHATab,@object
+ 	.size	__ssin_ha__vmlsSinHATab,8
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_s_la.s
+index f813361..e10fd68 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sin_s_la.s
+@@ -40,6 +40,7 @@ __svml_sinf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2751,4 +2752,20 @@ __ssin_la__vmlsSinHATab:
+ 	.type	__ssin_la__vmlsSinHATab,@object
+ 	.size	__ssin_la__vmlsSinHATab,8
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_d_ha.s
+index 28bbf80..c7e24b3 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_d_ha.s
+@@ -25,6 +25,7 @@ __svml_sinh8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -5530,4 +5531,20 @@ __dsinh_ha_CoutTab:
+ 	.long	0x00000000,0x80000000,0x00000000,0x00000000
+ 	.type	.L_2il0floatpacket.100,@object
+ 	.size	.L_2il0floatpacket.100,16
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_d_la.s
+index d0ce5c4..498dd43 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_d_la.s
+@@ -15,6 +15,7 @@ __svml_sinh8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2052,4 +2053,20 @@ __dsinh_la_CoutTab:
+ 	.type	.L_2il0floatpacket.97,@object
+ 	.size	.L_2il0floatpacket.97,16
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_h_la.s
+index 2ff62fc..90f50fc 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_h_la.s
+@@ -28,6 +28,7 @@
+ __svml_sinhs32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_hsinh_data_internal(%rip), %zmm23
+         vmovdqu16 64+__svml_hsinh_data_internal(%rip), %zmm29
+@@ -170,4 +171,20 @@ __svml_hsinh_data_internal:
+ 	.endr
+         .type	__svml_hsinh_data_internal,@object
+         .size	__svml_hsinh_data_internal,704
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_s_ha.s
+index 5fad91b..7456ddf 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_s_ha.s
+@@ -25,6 +25,7 @@ __svml_sinhf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -2379,4 +2380,20 @@ __ssinh_ha_CoutTab:
+ 	.long	0x00000000,0x80000000,0x00000000,0x00000000
+ 	.type	.L_2il0floatpacket.96,@object
+ 	.size	.L_2il0floatpacket.96,16
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_s_la.s
+index fb2f9e5..83cbceb 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_sinh_s_la.s
+@@ -15,6 +15,7 @@ __svml_sinhf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1446,4 +1447,20 @@ __ssinh_la_CoutTab:
+ 	.type	.L_2il0floatpacket.98,@object
+ 	.size	.L_2il0floatpacket.98,16
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_d_ha.s
+index 6742511..12a4de3 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_d_ha.s
+@@ -41,6 +41,7 @@ __svml_tan8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -20004,4 +20005,20 @@ __dtan_ha_Tab:
+ 	.long	2146435072
+ 	.type	__dtan_ha_Tab,@object
+ 	.size	__dtan_ha_Tab,16
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_d_la.s
+index 0b1b940..c6d5165 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_d_la.s
+@@ -31,6 +31,7 @@ __svml_tan8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -20219,4 +20220,20 @@ __dtan_la_Tab:
+ 	.type	__dtan_la_Tab,@object
+ 	.size	__dtan_la_Tab,16
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_h_la.s
+index 6079df2..525fc9c 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_h_la.s
+@@ -25,6 +25,7 @@
+ __svml_tans32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovups   __svml_htan_data_internal(%rip), %zmm25
+         vmovups   64+__svml_htan_data_internal(%rip), %zmm4
+@@ -159,4 +160,20 @@ __svml_htan_data_internal:
+ 	.endr
+         .type	__svml_htan_data_internal,@object
+         .size	__svml_htan_data_internal,576
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_s_ha.s
+index fab8731..c580c4a 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_s_ha.s
+@@ -41,6 +41,7 @@ __svml_tanf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -3116,4 +3117,20 @@ __stan_ha__vmlsTanTab:
+ 	.long	2139095040
+ 	.type	__stan_ha__vmlsTanTab,@object
+ 	.size	__stan_ha__vmlsTanTab,8
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_s_la.s
+index cf57cf4..d0e311d 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tan_s_la.s
+@@ -31,6 +31,7 @@ __svml_tanf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -3177,4 +3178,20 @@ __stan_la__vmlsTanTab:
+ 	.type	__stan_la__vmlsTanTab,@object
+ 	.size	__stan_la__vmlsTanTab,8
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_d_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_d_ha.s
+index be78823..5696a49 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_d_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_d_ha.s
+@@ -80,6 +80,7 @@ __svml_tanh8_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -3059,4 +3060,20 @@ __dtanh_ha__imldTanhTab:
+ 	.long	3220176896
+ 	.type	__dtanh_ha__imldTanhTab,@object
+ 	.size	__dtanh_ha__imldTanhTab,16
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_d_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_d_la.s
+index cbdb585..0c9c2a8 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_d_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_d_la.s
+@@ -70,6 +70,7 @@ __svml_tanh8:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -3046,4 +3047,20 @@ __dtanh_la__imldTanhTab:
+ 	.type	__dtanh_la__imldTanhTab,@object
+ 	.size	__dtanh_la__imldTanhTab,16
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_h_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_h_la.s
+index cfedd0e..8efb0c2 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_h_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_h_la.s
+@@ -35,6 +35,7 @@
+ __svml_tanhs32:
+ 
+         .cfi_startproc
++	endbr64
+         kxnord  %k7, %k7, %k7
+         vmovdqu16 __svml_htanh_data_internal(%rip), %zmm31
+         vmovdqu16 64+__svml_htanh_data_internal(%rip), %zmm30
+@@ -181,4 +182,20 @@ __svml_htanh_data_internal:
+ 	.endr
+         .type	__svml_htanh_data_internal,@object
+         .size	__svml_htanh_data_internal,320
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+ 	 .section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_s_ha.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_s_ha.s
+index 8dd5a10..f3fc84f 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_s_ha.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_s_ha.s
+@@ -80,6 +80,7 @@ __svml_tanhf16_ha:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1166,4 +1167,20 @@ __stanh_ha__imlsTanhTab:
+ 	.long	3212836864
+ 	.type	__stanh_ha__imlsTanhTab,@object
+ 	.size	__stanh_ha__imlsTanhTab,8
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       	.section        .note.GNU-stack,"",@progbits
+diff --git a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_s_la.s b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_s_la.s
+index a2c1556..054609d 100644
+--- a/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_s_la.s
++++ b/numpy/_core/src/umath/svml/linux/avx512/svml_z0_tanh_s_la.s
+@@ -70,6 +70,7 @@ __svml_tanhf16:
+ 
+ 
+ 	.cfi_startproc
++	endbr64
+ ..L2:
+ 
+         pushq     %rbp
+@@ -1791,4 +1792,20 @@ __stanh_la__imlsTanhTab:
+ 	.type	__stanh_la__imlsTanhTab,@object
+ 	.size	__stanh_la__imlsTanhTab,8
+ 
++	.section ".note.gnu.property", "a"
++	.p2align 3
++	.long 1f - 0f
++	.long 4f - 1f
++	.long 5
++0:
++	.asciz "GNU"
++1:
++	.p2align 3
++	.long 0xc0000002
++	.long 3f - 2f
++2:
++	.long 3
++3:
++	.p2align 3
++4:
+       .section        .note.GNU-stack,"",@progbits
+-- 
+2.55.0
+
